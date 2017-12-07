@@ -56,27 +56,42 @@ telaCongratuacoes BYTE "Parabens", 10, 10
 campo BYTE 101 dup (?) 
 
 ; TODO: resolver esse char 10d (fazer lógica de pular linha)
+
 primeiroCampo BYTE "          "
+			  BYTE "          "
+			  BYTE "   +++    "
+			  BYTE "   +x+    "
+			  BYTE "   +.++++ "
+			  BYTE " +++o.ox+ "
+			  BYTE " +x.o!+++ "
+			  BYTE " ++++o+   "
+			  BYTE "    +x+   "
+			  BYTE "    +++   ", 0
+
+
+segundoCampo  BYTE "          "
+			  BYTE "+++++     "
+			  BYTE "+!..+     "
+			  BYTE "+.oo+ +++ "
+			  BYTE "+.o.+ +x+ "
+			  BYTE "+++.+++x+ "
+			  BYTE " ++....x+ "
+			  BYTE " +...+..+ "
+			  BYTE " +...++++ "
+			  BYTE " +++++    ", 0
+
+
+terceiroCampo BYTE "          "
+			  BYTE "          "
 			  BYTE " +++++++  "
-			  BYTE " +!....+  "
-			  BYTE " +++++.+  "
-			  BYTE "     +.+  "
-			  BYTE "     +o+  "
-			  BYTE "     +.+  "
-			  BYTE "     +x+  "
-			  BYTE "     +++  "
+			  BYTE " +.....+++"
+			  BYTE "++o+++...+"
+			  BYTE "+.!.o..o.+"
+			  BYTE "+.xx+.o.++"
+			  BYTE "++xx+...+ "
+			  BYTE " ++++++++ "
 			  BYTE "          ", 0
 
-segundoCampo  BYTE "AAAAAAAAAA"
-			  BYTE " +++++++  "
-			  BYTE " +!....+  "
-			  BYTE " +++++.+  "
-			  BYTE "     +.+  "
-			  BYTE "     +o+  "
-			  BYTE "     +.+  "
-			  BYTE "     +x+  "
-			  BYTE "     +++  "
-			  BYTE "          ", 0
 
 .code
 
@@ -84,38 +99,38 @@ imprimeTela PROTO
 
 main PROC
 	; Iniciar Menu
-MenuPrincipal:
+menuPrincipal:
 	invoke Clrscr
 	mov edx, OFFSET telaMenu
 	invoke WriteString
 
-EspereImputMenuPrincipal:
+espereImputMenuPrincipal:
 	mov eax, 250
 	invoke Delay
 	invoke ReadKey
-	jz EspereImputMenuPrincipal
+	jz espereImputMenuPrincipal
 									; TODO: desaparecer o numero entrado pelo usuario
 	cmp al, 31h						; ir para (1) NovoJogo
-	je NovoJogo
+	je novoJogo
 	cmp al, 32h						; ir para (2) Ajuda
 	je Ajuda
 	cmp al, 33h						; ir para (3) Sobre
 	je Sobre
 	cmp al, 30h
 	je Sair
-	jmp MenuPrincipal
+	jmp menuPrincipal
 
 Sobre:
 	invoke Clrscr					; Limpe a tela
 	mov edx, OFFSET telaSobre 		; Escrever o texto da tela sobre
 	invoke WriteString
 
-EspereImputSobre:
+espereImputSobre:
 	invoke ReadKey
-	jz EspereImputSobre
+	jz espereImputSobre
 
 	cmp al, 30h
-	je MenuPrincipal
+	je menuPrincipal
 	jmp Sobre
 
 Ajuda:
@@ -123,15 +138,15 @@ Ajuda:
 	mov edx, OFFSET telaAjuda 		; Escrever o texto da tela sobre
 	invoke WriteString
 
-EspereImputAjuda:
+espereImputAjuda:
 	invoke ReadKey
-	jz EspereImputAjuda
+	jz espereImputAjuda
 
 	cmp al, 30h
-	je MenuPrincipal
+	je menuPrincipal
 	jmp Sobre
 
-NovoJogo:
+novoJogo:
 	invoke Clrscr					; Limpe a tela
 	mov edx, OFFSET primeiroCampo
 	;int 3
@@ -140,13 +155,13 @@ NovoJogo:
 	call atualizaCampoAtual
 	call imprimeTelaJogo
 
-EspereImputJogo:
+espereImputJogo:
 	invoke ReadKey
-	jz EspereImputJogo
+	jz espereImputJogo
 
 	cmp al, 30h
 	je Sair
-	jmp NovoJogo
+	jmp novoJogo
 
 Sair:
 	invoke Clrscr
