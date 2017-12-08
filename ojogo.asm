@@ -4,7 +4,7 @@ include ..\Irvine32.inc
 ; [x] Desenvolver o procedimento que imprime a tela de instruções.
 ; [x] Desenvolver a tela de congratulações ao jogador.
 ; [x] Implementar a união entre as diversas telas presentes no jogo.
-; [N] Definir a configuração de, no mínimo, três campos.
+; [x] Definir a configuração de, no mínimo, três campos.
 ; [x] Desenvolver o procedimento que imprime um campo pré-definido na tela.
 ; [ ] Desenvolver o procedimento que trata da movimentação do personagem no campo, bem como incrementa a variável qtdMovimentos (2.2.5).
 ; [ ] Desenvolver a colisão entre jogador e caixa.
@@ -21,6 +21,9 @@ include ..\Irvine32.inc
 
 
 .data
+
+posicao BYTE (?)
+
 telaMenu BYTE "SOKOBAN", 10, 10
 			  BYTE "(1) Novo Jogo", 10
 			  BYTE "(2) Ajuda", 10
@@ -54,9 +57,15 @@ telaCongratuacoes BYTE "Parabens", 10, 10
 		  BYTE "Press any button", 10, 0
 
 campo BYTE 101 dup (?) 
+campoAtual BYTE 1
+localOcupado BYTE 0
+qtdMovmento BYTE 0
+qtdCaixas BYTE 0
+qtdCaixasPosicionadas BYTE 0
 
 ; TODO: resolver esse char 10d (fazer lógica de pular linha)
 
+; posicao = 65d ou 41h
 primeiroCampo BYTE "          "
 			  BYTE "          "
 			  BYTE "   +++    "
@@ -68,7 +77,7 @@ primeiroCampo BYTE "          "
 			  BYTE "    +x+   "
 			  BYTE "    +++   ", 0
 
-
+; posicao = 21d ou 15h
 segundoCampo  BYTE "          "
 			  BYTE "+++++     "
 			  BYTE "+!..+     "
@@ -80,7 +89,7 @@ segundoCampo  BYTE "          "
 			  BYTE " +...++++ "
 			  BYTE " +++++    ", 0
 
-
+; posicao = 52d ou 34h
 terceiroCampo BYTE "          "
 			  BYTE "          "
 			  BYTE " +++++++  "
@@ -96,6 +105,8 @@ terceiroCampo BYTE "          "
 .code
 
 imprimeTela PROTO
+jogoLoop PROTO
+atualizaCampoAtual PROTO
 
 main PROC
 	; Iniciar Menu
@@ -147,13 +158,8 @@ espereImputAjuda:
 	jmp Sobre
 
 novoJogo:
-	invoke Clrscr					; Limpe a tela
-	mov edx, OFFSET primeiroCampo
-	;int 3
-	mov al, campo[15]
-	call WriteChar
-	call atualizaCampoAtual
-	call imprimeTelaJogo
+	call jogoLoop
+	jmp menuPrincipal
 
 espereImputJogo:
 	invoke ReadKey
@@ -205,6 +211,144 @@ ImprimeSair:
 	call Crlf
 	ret
 imprimeTelaJogo ENDP
+
+
+jogoLoop PROC
+
+resetarJogo:
+	mov qtdMovmento, 0
+	mov qtdCaixasPosicionadas, 0
+	mov eax, campoAtual
+	cmp eax, 1
+	jz Campo1
+	cmp eax, 2
+	jz Campo2
+	jmp Campo3
+
+campo1:
+	mov edx, OFFSET primeiroCampo
+	mov posicao, 65d
+	mov qtdCaixas, 4
+	call atualizaCampoAtual
+	jmp LoopEvento
+
+campo2:
+	mov edx, OFFSET segundoCampo
+	mov posicao, 65d
+	mov qtdCaixas, 3
+	call atualizaCampoAtual
+	jmp LoopEvento
+
+campo3:
+	mov edx, OFFSET terceiroCampo
+	mov posicao, 65d
+	mov qtdCaixas, 4
+	call atualizaCampoAtual
+
+loopEvento:
+	invoke Clrscr
+	call imprimeTelaJogo
+	call ReadKey					; input
+
+espereEntrada:
+	mov eax, 250
+	invoke Delay
+	invoke ReadKey
+	jz espereEntrada
+
+	cmp al, 30h						; menu principal
+	jz saidaJogoLoop
+	cmp al, 31h
+	jz resetarJogo
+
+	call movimenta
+
+saidaJogoLoop:
+	ret
+jogoLoop ENDP
+
+movimenta PROC	
+	cmp dx, VK_LEFT					; esquerda
+	jz moveEsquerda
+	cmp dx, VK_UP					; cima
+	jz moveCima
+	cmp dx, VK_RIGHT				; direita
+	jz moveDireita
+	cmp dx, VK_DOWN					; baixo
+	jz moveBaixo
+	jmp movimentoInvalido
+
+moveEsquerda:
+	mov al, campo[posicao-1]
+	cmp al, 43d					
+	jz movimentoInvalido
+	cmp al, 111d
+	jz movimentaCaixaEsquerda
+	cmp al, 88d
+	jz movimentaCaixaEsquerda
+									; + (parede) 43d
+									; . (chao) 46d
+									; o (caixa) 111d
+									; x (posicao certa sem caixa) 120d
+									; X (caixa na posicao certa) 88d
+movimentaCaixaEsquerda:
+	mov ah, campo[posicao-2]
+	cmp ah, 43d
+	jz movimentoInvalido
+	cmp ah, 111d
+	jz movimentoInvalido
+	cmp ah, 88d
+	jz movimentoInvalido
+
+
+	cmp ah, 46d						; programação orientada a go to
+	jz movimentaCaixaEsquerdaChao
+	mov bl, localOcupado
+	cmp bl, 1
+	jz localOcupadoEsquerda
+	mov campo[posicao], 46d
+	cmp al, 88d
+	jz localOcupadoEsquerdaMantem
+	mov localOcupado, 0
+	jmp localOcupadoEsquerdaMantem
+
+
+localOcupadoEsquerda:
+	mov campo[posicao], 111d
+	cmp al, 88d
+	jz localOcupadoEsquerdaMantem 
+	mov localOcupado, 0
+	jmp localOcupadoEsquerdaMantem
+
+localOcupadoEsquerdaMantem:
+	mov campo[posicao-1], 33d		; !
+	mov campo[posicao-2], 88d
+	jmp fimMovimento
+
+movimentaCaixaEsquerdaChao:
+	mov bl, localOcupado
+	cmp bl, 1
+	jz localOcupadoEsquerdaChao
+
+localOcupadoEsquerdaChao:
+
+	
+
+moveDireita:
+
+moveBaixo:
+
+moveCima:
+
+
+
+
+
+fimMovimento:
+
+movimentoInvalido:
+	ret
+movimenta ENDP
 
 
 END main
