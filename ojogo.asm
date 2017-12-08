@@ -6,29 +6,35 @@ include ..\Irvine32.inc
 ; [x] Implementar a união entre as diversas telas presentes no jogo.
 ; [x] Definir a configuração de, no mínimo, três campos.
 ; [x] Desenvolver o procedimento que imprime um campo pré-definido na tela.
-; [ ] Desenvolver o procedimento que trata da movimentação do personagem no campo, bem como incrementa a variável qtdMovimentos (2.2.5).
-; [ ] Desenvolver a colisão entre jogador e caixa.
-; [ ] Desenvolver a colisão com as paredes do campo.
-; [ ] Desenvolver o procedimento que trata do movimento das caixas.
-; [ ] Desenvolver o procedimento que atualiza a variável qtdCaixasPosicionadas (2.2.4), caso uma caixa entre no local desejado, ou saia do mesmo.
-; [ ] Desenvolver o procedimento que, após todas as caixas estarem posicionadas em seus respectivos locais, passa para a próxima fase ou, caso seja a última fase, apresenta a tela de congratulações ao jogador.
-; [ ] Desenvolver o procedimento que permita ao jogador reiniciar a fase para a sua configuração original.
+; [x] Desenvolver o procedimento que trata da movimentação do personagem no campo, bem como incrementa a variável qtdMovimentos (2.2.5).
+; [x] Desenvolver a colisão entre jogador e caixa.
+; [x] Desenvolver a colisão com as paredes do campo.
+; [x] Desenvolver o procedimento que trata do movimento das caixas.
+; [x] Desenvolver o procedimento que atualiza a variável qtdCaixasPosicionadas (2.2.4), caso uma caixa entre no local desejado, ou saia do mesmo.
+; [x] Desenvolver o procedimento que, após todas as caixas estarem posicionadas em seus respectivos locais, passa para a próxima fase ou, caso seja a última fase, apresenta a tela de congratulações ao jogador.
+; [x] Desenvolver o procedimento que permita ao jogador reiniciar a fase para a sua configuração original.
 ; NOPE [ ] Desenvolver o procedimento que permita ao jogador iniciar um novo jogo, partindo da configuração inicial da primeira fase.
-; [ ] Ligar novo jogo a tela de congatulações
-; [ ] Testes.
+; [x] Ligar novo jogo a tela de congatulações
+; [x] Testes.
 ; [ ] Correções de eventuais erros.
 
 
 
 .data
 
-posicao BYTE (?)
+posicao DWORD ?
 
 telaMenu BYTE "SOKOBAN", 10, 10
 			  BYTE "(1) Novo Jogo", 10
 			  BYTE "(2) Ajuda", 10
 			  BYTE "(3) Sobre", 10
 			  BYTE "(0) Sair", 10, 10, 0
+
+
+imprimeQtdMovimentos BYTE "Quantidade de movimentos: ", 0
+
+imprimeComandosEmJogo 	BYTE "Aperte 0 para voltar ao menu inicial", 10
+						BYTE "Aperte 1 para retornar a configuracao inicial do campo", 10, 0
 
 telaSobre BYTE "Sobre", 10, 10
 		  BYTE "Desenvolvido por:", 10
@@ -52,14 +58,27 @@ telaAjuda BYTE "Ajuda", 10, 10
 		  BYTE "O objetivo e posicionar todas as caixas nos locais demarcados!", 10, 10, 10
 		  BYTE "(0) Voltar", 10, 0
 
-telaCongratuacoes BYTE "Parabens", 10, 10
+telaCongratulacoes BYTE "Parabens", 10, 10
 		  BYTE "Voce ganhou!", 10, 10
 		  BYTE "Press any button", 10, 0
+
+
+telaCongratulacoes2 BYTE " _____                             _         _       _   _                 ", 10
+					BYTE "/  __ \                           | |       | |     | | (_)                ", 10
+					BYTE "| /  \/ ___  _ __   __ _ _ __ __ _| |_ _   _| | __ _| |_ _  ___  _ __  ___ ", 10
+					BYTE "| |    / _ \| '_ \ / _` | '__/ _` | __| | | | |/ _` | __| |/ _ \| '_ \/ __|", 10
+					BYTE "| \__/\ (_) | | | | (_| | | | (_| | |_| |_| | | (_| | |_| | (_) | | | \__ \", 10
+					BYTE " \____/\___/|_| |_|\__, |_|  \__,_|\__|\__,_|_|\__,_|\__|_|\___/|_| |_|___/", 10
+					BYTE "                    __/ |                                                  ", 10
+					BYTE "                   |___/                                                   ", 10, 10
+					BYTE "      Voce conseguiu vencer o jogo, agora pode esquecer da tristeza que foi fazer isso :)", 10, 10
+					BYTE "   Aperte qualquer botao para voltar ao menu principal", 10, 0
+
 
 campo BYTE 101 dup (?) 
 campoAtual BYTE 1
 localOcupado BYTE 0
-qtdMovmento BYTE 0
+qtdMovimentos DWORD 0
 qtdCaixas BYTE 0
 qtdCaixasPosicionadas BYTE 0
 
@@ -155,7 +174,7 @@ espereImputAjuda:
 
 	cmp al, 30h
 	je menuPrincipal
-	jmp Sobre
+	jmp Ajuda
 
 novoJogo:
 	call jogoLoop
@@ -194,7 +213,6 @@ ImprimeL1:
 	call Crlf
 	mov esi, 0
 ImprimeL2:
-	;int 3
 	mov al, campo[ecx]				; move campo pra writechar
 	call WriteChar
 	inc esi
@@ -208,20 +226,29 @@ ImprimeL2:
 ImprimeSair:
 	call Crlf
 	call Crlf
+
+	mov edx, OFFSET imprimeQtdMovimentos
+	invoke WriteString
+	mov eax, qtdMovimentos
+	call WriteDec
+	call Crlf
+	call Crlf
+	mov edx, OFFSET imprimeComandosEmJogo
+	invoke WriteString
+	call Crlf
 	call Crlf
 	ret
 imprimeTelaJogo ENDP
 
 
 jogoLoop PROC
-
 resetarJogo:
-	mov qtdMovmento, 0
+	mov qtdMovimentos, 0
 	mov qtdCaixasPosicionadas, 0
-	mov eax, campoAtual
-	cmp eax, 1
+	mov al, campoAtual
+	cmp al, 1
 	jz Campo1
-	cmp eax, 2
+	cmp al, 2
 	jz Campo2
 	jmp Campo3
 
@@ -234,14 +261,14 @@ campo1:
 
 campo2:
 	mov edx, OFFSET segundoCampo
-	mov posicao, 65d
+	mov posicao, 21d
 	mov qtdCaixas, 3
 	call atualizaCampoAtual
 	jmp LoopEvento
 
 campo3:
 	mov edx, OFFSET terceiroCampo
-	mov posicao, 65d
+	mov posicao, 52d
 	mov qtdCaixas, 4
 	call atualizaCampoAtual
 
@@ -263,11 +290,41 @@ espereEntrada:
 
 	call movimenta
 
+	mov al, qtdCaixasPosicionadas
+	cmp al, qtdCaixas
+	jz proximoCampo
+
+	jmp loopEvento
+
+proximoCampo:
+	inc campoAtual
+	cmp campoAtual, 4
+	jz congratulations
+	jmp resetarJogo
+
+
+congratulations:
+	invoke Clrscr
+	mov edx, OFFSET telaCongratulacoes2
+	invoke WriteString
+
+cz2:
+	invoke ReadKey
+	jz cz2
+
+
 saidaJogoLoop:
 	ret
 jogoLoop ENDP
 
-movimenta PROC	
+
+									; + (parede) 43d
+									; . (chao) 46d
+									; o (caixa) 111d
+									; x (posicao certa sem caixa) 120d
+									; X (caixa na posicao certa) 88d
+
+movimenta PROC
 	cmp dx, VK_LEFT					; esquerda
 	jz moveEsquerda
 	cmp dx, VK_UP					; cima
@@ -279,20 +336,57 @@ movimenta PROC
 	jmp movimentoInvalido
 
 moveEsquerda:
-	mov al, campo[posicao-1]
+	mov edx, posicao
+	mov ecx, posicao
+	dec ecx
+	mov al, campo[ecx]
 	cmp al, 43d					
 	jz movimentoInvalido
 	cmp al, 111d
 	jz movimentaCaixaEsquerda
 	cmp al, 88d
 	jz movimentaCaixaEsquerda
-									; + (parede) 43d
-									; . (chao) 46d
-									; o (caixa) 111d
-									; x (posicao certa sem caixa) 120d
-									; X (caixa na posicao certa) 88d
+	cmp al, 46d
+	jz moveChaoEsquerda
+
+	mov bl, localOcupado
+	cmp bl, 1
+	jz movePosicaoEsquerdaOcupado
+	mov localOcupado, 1
+	mov campo[edx], 46d
+	mov campo[ecx], 33d
+	mov posicao, ecx
+	jmp fimMovimento
+
+movePosicaoEsquerdaOcupado:
+	mov campo[edx], 120d
+	mov campo[ecx], 33d
+	mov posicao, ecx
+	jmp fimMovimento
+	
+
+moveChaoEsquerda:
+	mov bl, localOcupado
+	cmp bl, 1
+	jz moveChaoEsquerdaOcupado
+	mov campo[edx], 46d
+	mov campo[ecx], 33d
+	mov posicao, ecx
+	jmp fimMovimento
+
+moveChaoEsquerdaOcupado:
+	mov localOcupado, 0
+	mov campo[edx], 120d
+	mov campo[ecx], 33d
+	mov posicao, ecx
+	jmp fimMovimento
+
+
 movimentaCaixaEsquerda:
-	mov ah, campo[posicao-2]
+	mov ebx, posicao
+	dec ebx
+	dec ebx
+	mov ah, campo[ebx]
 	cmp ah, 43d
 	jz movimentoInvalido
 	cmp ah, 111d
@@ -301,50 +395,438 @@ movimentaCaixaEsquerda:
 	jz movimentoInvalido
 
 
-	cmp ah, 46d						; programação orientada a go to
+	cmp ah, 46d						; Caixa será movida para um chão?
 	jz movimentaCaixaEsquerdaChao
+	push ebx
 	mov bl, localOcupado
 	cmp bl, 1
 	jz localOcupadoEsquerda
-	mov campo[posicao], 46d
+	mov campo[edx], 46d
 	cmp al, 88d
-	jz localOcupadoEsquerdaMantem
+	jz moveEsquerdaFimOcupado
 	mov localOcupado, 0
-	jmp localOcupadoEsquerdaMantem
+	inc qtdCaixasPosicionadas
+	jmp moveEsquerdaFim
 
 
 localOcupadoEsquerda:
-	mov campo[posicao], 111d
+	mov campo[edx], 120d
 	cmp al, 88d
-	jz localOcupadoEsquerdaMantem 
+	jz moveEsquerdaFim 
 	mov localOcupado, 0
-	jmp localOcupadoEsquerdaMantem
+	inc qtdCaixasPosicionadas
+	jmp moveEsquerdaFim
 
-localOcupadoEsquerdaMantem:
-	mov campo[posicao-1], 33d		; !
-	mov campo[posicao-2], 88d
+moveEsquerdaFimOcupado:
+	mov localOcupado, 1
+moveEsquerdaFim:
+	mov campo[ecx], 33d		; !
+	mov posicao, ecx
+	pop ebx
+	mov campo[ebx], 88d
 	jmp fimMovimento
 
 movimentaCaixaEsquerdaChao:
+	push ebx
 	mov bl, localOcupado
 	cmp bl, 1
 	jz localOcupadoEsquerdaChao
+	mov campo[edx], 46d
+	cmp al, 88d
+	jz moveEsquerdaFimChao
+	mov localOcupado, 0
+	jmp moveEsquerdaFimChaoNo
+
 
 localOcupadoEsquerdaChao:
-
+	mov campo[edx], 120d
+	cmp al, 88d
+	jz moveEsquerdaFimChao
+	mov localOcupado, 0
+	jmp moveEsquerdaFimChaoNo
 	
+moveEsquerdaFimChao:
+	dec qtdCaixasPosicionadas
+moveEsquerdaFimChaoNo:
+	mov campo[ecx], 33d
+	mov posicao, ecx
+	pop ebx
+	mov campo[ebx], 111d
+	jmp fimMovimento
 
 moveDireita:
+	mov edx, posicao
+	mov ecx, posicao
+	inc ecx
+	mov al, campo[ecx]
+	cmp al, 43d					
+	jz movimentoInvalido
+	cmp al, 111d
+	jz movimentaCaixaDireita
+	cmp al, 88d
+	jz movimentaCaixaDireita
+	cmp al, 46d
+	jz moveChaoDireita
 
+	mov bl, localOcupado
+	cmp bl, 1
+	jz movePosicaoDireitaOcupado
+	mov localOcupado, 1
+	mov campo[edx], 46d
+	mov campo[ecx], 33d
+	mov posicao, ecx
+	jmp fimMovimento
+
+movePosicaoDireitaOcupado:
+	mov campo[edx], 120d
+	mov campo[ecx], 33d
+	mov posicao, ecx
+	jmp fimMovimento
+	
+
+moveChaoDireita:
+	mov bl, localOcupado
+	cmp bl, 1
+	jz moveChaoDireitaOcupado
+	mov campo[edx], 46d
+	mov campo[ecx], 33d
+	mov posicao, ecx
+	jmp fimMovimento
+
+moveChaoDireitaOcupado:
+	mov localOcupado, 0
+	mov campo[edx], 120d
+	mov campo[ecx], 33d
+	mov posicao, ecx
+	jmp fimMovimento
+
+
+movimentaCaixaDireita:
+	mov ebx, posicao
+	inc ebx
+	inc ebx
+	mov ah, campo[ebx]
+	cmp ah, 43d
+	jz movimentoInvalido
+	cmp ah, 111d
+	jz movimentoInvalido
+	cmp ah, 88d
+	jz movimentoInvalido
+
+
+	cmp ah, 46d						; Caixa será movida para um chão?
+	jz movimentaCaixaDireitaChao
+	push ebx
+	mov bl, localOcupado
+	cmp bl, 1
+	jz localOcupadoDireita
+	mov campo[edx], 46d
+	cmp al, 88d
+	jz moveDireitaFimOcupado
+	mov localOcupado, 0
+	inc qtdCaixasPosicionadas
+	jmp moveDireitaFim
+
+
+localOcupadoDireita:
+	mov campo[edx], 120d
+	cmp al, 88d
+	jz moveDireitaFim 
+	mov localOcupado, 0
+	inc qtdCaixasPosicionadas
+	jmp moveDireitaFim
+
+moveDireitaFimOcupado:
+	mov localOcupado, 1
+moveDireitaFim:
+	mov campo[ecx], 33d		; !
+	mov posicao, ecx
+	pop ebx
+	mov campo[ebx], 88d
+	jmp fimMovimento
+
+movimentaCaixaDireitaChao:
+	push ebx
+	mov bl, localOcupado
+	cmp bl, 1
+	jz localOcupadoDireitaChao
+	mov campo[edx], 46d
+	cmp al, 88d
+	jz moveDireitaFimChao
+	mov localOcupado, 0
+	jmp moveDireitaFimChaoNo
+
+
+localOcupadoDireitaChao:
+	mov campo[edx], 120d
+	cmp al, 88d
+	jz moveDireitaFimChao
+	mov localOcupado, 0
+	jmp moveDireitaFimChaoNo
+	
+moveDireitaFimChao:
+	dec qtdCaixasPosicionadas
+moveDireitaFimChaoNo:
+	mov campo[ecx], 33d
+	mov posicao, ecx
+	pop ebx
+	mov campo[ebx], 111d
+	jmp fimMovimento
 moveBaixo:
+	mov edx, posicao
+	mov ecx, posicao
+	push edx
+	mov edx, 10d
+	add ecx, edx
+	pop edx
+	mov al, campo[ecx]
+	cmp al, 43d					
+	jz movimentoInvalido
+	cmp al, 111d
+	jz movimentaCaixaBaixo
+	cmp al, 88d
+	jz movimentaCaixaBaixo
+	cmp al, 46d
+	jz moveChaoBaixo
+
+	mov bl, localOcupado
+	cmp bl, 1
+	jz movePosicaoBaixoOcupado
+	mov localOcupado, 1
+	mov campo[edx], 46d
+	mov campo[ecx], 33d
+	mov posicao, ecx
+	jmp fimMovimento
+
+movePosicaoBaixoOcupado:
+	mov campo[edx], 120d
+	mov campo[ecx], 33d
+	mov posicao, ecx
+	jmp fimMovimento
+	
+
+moveChaoBaixo:
+	mov bl, localOcupado
+	cmp bl, 1
+	jz moveChaoBaixoOcupado
+	mov campo[edx], 46d
+	mov campo[ecx], 33d
+	mov posicao, ecx
+	jmp fimMovimento
+
+moveChaoBaixoOcupado:
+	mov localOcupado, 0
+	mov campo[edx], 120d
+	mov campo[ecx], 33d
+	mov posicao, ecx
+	jmp fimMovimento
+
+
+movimentaCaixaBaixo:
+	mov ebx, posicao
+	push edx
+	mov edx, 20d
+	add ebx, edx
+	pop edx
+	mov ah, campo[ebx]
+	cmp ah, 43d
+	jz movimentoInvalido
+	cmp ah, 111d
+	jz movimentoInvalido
+	cmp ah, 88d
+	jz movimentoInvalido
+
+
+	cmp ah, 46d
+	jz movimentaCaixaBaixoChao
+	push ebx
+	mov bl, localOcupado
+	cmp bl, 1
+	jz localOcupadoBaixo
+	mov campo[edx], 46d
+	cmp al, 88d
+	jz moveBaixoFimOcupado
+	mov localOcupado, 0
+	inc qtdCaixasPosicionadas
+	jmp moveBaixoFim
+
+
+localOcupadoBaixo:
+	mov campo[edx], 120d
+	cmp al, 88d
+	jz moveBaixoFim 
+	mov localOcupado, 0
+	inc qtdCaixasPosicionadas
+	jmp moveBaixoFim
+
+moveBaixoFimOcupado:
+	mov localOcupado, 1
+moveBaixoFim:
+	mov campo[ecx], 33d		; !
+	mov posicao, ecx
+	pop ebx
+	mov campo[ebx], 88d
+	jmp fimMovimento
+
+movimentaCaixaBaixoChao:
+	push ebx
+	mov bl, localOcupado
+	cmp bl, 1
+	jz localOcupadoBaixoChao
+	mov campo[edx], 46d
+	cmp al, 88d
+	jz moveBaixoFimChao
+	mov localOcupado, 0
+	jmp moveBaixoFimChaoNo
+
+
+localOcupadoBaixoChao:
+	mov campo[edx], 120d
+	cmp al, 88d
+	jz moveBaixoFimChao
+	mov localOcupado, 0
+	jmp moveBaixoFimChaoNo
+	
+moveBaixoFimChao:
+	dec qtdCaixasPosicionadas
+moveBaixoFimChaoNo:
+	mov campo[ecx], 33d
+	mov posicao, ecx
+	pop ebx
+	mov campo[ebx], 111d
+	jmp fimMovimento
 
 moveCima:
+	mov edx, posicao
+	mov ecx, posicao
+	push edx
+	mov edx, 10d
+	sub ecx, edx
+	pop edx
+	mov al, campo[ecx]
+	cmp al, 43d					
+	jz movimentoInvalido
+	cmp al, 111d
+	jz movimentaCaixaCima
+	cmp al, 88d
+	jz movimentaCaixaCima
+	cmp al, 46d
+	jz moveChaoCima
 
+	mov bl, localOcupado
+	cmp bl, 1
+	jz movePosicaoCimaOcupado
+	mov localOcupado, 1
+	mov campo[edx], 46d
+	mov campo[ecx], 33d
+	mov posicao, ecx
+	jmp fimMovimento
+
+movePosicaoCimaOcupado:
+	mov campo[edx], 120d
+	mov campo[ecx], 33d
+	mov posicao, ecx
+	jmp fimMovimento
+	
+
+moveChaoCima:
+	mov bl, localOcupado
+	cmp bl, 1
+	jz moveChaoCimaOcupado
+	mov campo[edx], 46d
+	mov campo[ecx], 33d
+	mov posicao, ecx
+	jmp fimMovimento
+
+moveChaoCimaOcupado:
+	mov localOcupado, 0
+	mov campo[edx], 120d
+	mov campo[ecx], 33d
+	mov posicao, ecx
+	jmp fimMovimento
+
+
+movimentaCaixaCima:
+	mov ebx, posicao
+	push edx
+	mov edx, 20d
+	sub ebx, edx
+	pop edx
+	mov ah, campo[ebx]
+	cmp ah, 43d
+	jz movimentoInvalido
+	cmp ah, 111d
+	jz movimentoInvalido
+	cmp ah, 88d
+	jz movimentoInvalido
+
+
+	cmp ah, 46d
+	jz movimentaCaixaCimaChao
+	push ebx
+	mov bl, localOcupado
+	cmp bl, 1
+	jz localOcupadoCima
+	mov campo[edx], 46d
+	cmp al, 88d
+	jz moveCimaFimOcupado
+	mov localOcupado, 0
+	inc qtdCaixasPosicionadas
+	jmp moveCimaFim
+
+
+localOcupadoCima:
+	mov campo[edx], 120d
+	cmp al, 88d
+	jz moveCimaFim 
+	mov localOcupado, 0
+	inc qtdCaixasPosicionadas
+	jmp moveCimaFim
+
+moveCimaFimOcupado:
+	mov localOcupado, 1
+moveCimaFim:
+	mov campo[ecx], 33d		; !
+	mov posicao, ecx
+	pop ebx
+	mov campo[ebx], 88d
+	jmp fimMovimento
+
+movimentaCaixaCimaChao:
+	push ebx
+	mov bl, localOcupado
+	cmp bl, 1
+	jz localOcupadoCimaChao
+	mov campo[edx], 46d
+	cmp al, 88d
+	jz moveCimaFimChao
+	mov localOcupado, 0
+	jmp moveCimaFimChaoNo
+
+
+localOcupadoCimaChao:
+	mov campo[edx], 120d
+	cmp al, 88d
+	jz moveCimaFimChao
+	mov localOcupado, 0
+	jmp moveCimaFimChaoNo
+	
+moveCimaFimChao:
+	dec qtdCaixasPosicionadas
+moveCimaFimChaoNo:
+	mov campo[ecx], 33d
+	mov posicao, ecx
+	pop ebx
+	mov campo[ebx], 111d
+	jmp fimMovimento
 
 
 
 
 fimMovimento:
+	inc qtdMovimentos
+	;invoke Clrscr
+	;call imprimeTelaJogo
 
 movimentoInvalido:
 	ret
