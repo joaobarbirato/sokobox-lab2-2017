@@ -126,6 +126,7 @@ terceiroCampo BYTE "          "
 imprimeTela PROTO
 jogoLoop PROTO
 atualizaCampoAtual PROTO
+beep PROTO
 
 main PROC
 	; Iniciar Menu
@@ -213,7 +214,56 @@ ImprimeL1:
 	call Crlf
 	mov esi, 0
 ImprimeL2:
+	mov eax, lightGray+(white*16)
+	call SetTextColor
+
 	mov al, campo[ecx]				; move campo pra writechar
+	; pintar
+	cmp al, '!'						; pinta personagem
+	jz pintaPersonagem
+	cmp al, 'x'						; lugar
+	jz pintarLugar
+	cmp al, 'X'						; caixa dentro
+	jz pintarCaixaDentro			
+	cmp al, 'o'						; caixa nao posicionada
+	jz pintarCaixaFora				
+	cmp al, '+'						; parede
+	jnz parePintar					
+
+	push eax
+	mov eax, lightCyan+(gray*16)
+	call SetTextColor
+	pop eax
+	jmp parePintar
+
+pintarCaixaFora:
+	push eax
+	mov eax, red+(white*16)
+	call SetTextColor
+	pop eax
+	jmp parePintar
+
+pintarCaixaDentro:
+	push eax
+	mov eax, lightGreen+(white*16)
+	call SetTextColor
+	pop eax
+	jmp parePintar
+
+pintarLugar:
+	push eax
+	mov eax, lightMagenta+(white*16)
+	call SetTextColor
+	pop eax
+	jmp parePintar
+
+pintaPersonagem:
+	push eax
+	mov eax, green+(white*16)
+	call SetTextColor
+	pop eax
+
+parePintar:
 	call WriteChar
 	inc esi
 	inc ecx
@@ -227,6 +277,8 @@ ImprimeSair:
 	call Crlf
 	call Crlf
 
+	mov eax, white
+	call SetTextColor
 	mov edx, OFFSET imprimeQtdMovimentos
 	invoke WriteString
 	mov eax, qtdMovimentos
@@ -824,6 +876,7 @@ moveCimaFimChaoNo:
 
 
 fimMovimento:
+	call beep
 	inc qtdMovimentos
 	;invoke Clrscr
 	;call imprimeTelaJogo
@@ -831,6 +884,14 @@ fimMovimento:
 movimentoInvalido:
 	ret
 movimenta ENDP
+
+beep PROC
+	push eax
+	mov al, 7
+	call WriteChar
+	pop eax
+	ret
+beep ENDP
 
 
 END main
