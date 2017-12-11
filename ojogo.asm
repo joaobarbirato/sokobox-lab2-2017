@@ -22,21 +22,21 @@ include ..\Irvine32.inc
 
 .data
 
-posicao DWORD ?
+posicao DWORD ?														; Posição do jogador no mapa. posicao/10 = row, posicao%10 = column
 
-telaMenu BYTE  10, 10, 9, 9, "SOKOBAN", 10, 10
-			  BYTE  9, 9, "(1) Novo Jogo", 10
+telaMenu BYTE  10, 10, 9, 9, "SOKOBAN", 10, 10						; Menu Inicial
+			  BYTE  9, 9, "(1) Novo Jogo", 10						
 			  BYTE  9, 9, "(2) Ajuda", 10
 			  BYTE  9, 9, "(3) Sobre", 10
 			  BYTE 	9, 9, "(0) Sair", 10, 10, 0
 
 
-imprimeQtdMovimentos BYTE "Quantidade de movimentos: ", 0
+imprimeQtdMovimentos BYTE "Quantidade de movimentos: ", 0			
 
-imprimeComandosEmJogo 	BYTE "Aperte 0 para voltar ao menu inicial", 10
+imprimeComandosEmJogo 	BYTE "Aperte 0 para voltar ao menu inicial", 10							; Imprime os comandos dentro da tela de jogo
 						BYTE "Aperte 1 para retornar a configuracao inicial do campo", 10, 0
 
-telaSobre BYTE 10, 10, 10, 9, 9, "Sobre", 10, 10
+telaSobre BYTE 10, 10, 10, 9, 9, "Sobre", 10, 10					; Sobre
 		  BYTE 9,9,"Desenvolvido por:", 10
 		  BYTE 9,9,9, "Joao Gabriel Melo Barbirato", 10
 		  BYTE 9,9,9, "Nicholas Resende Franco de Oliveira Lopes", 10
@@ -47,7 +47,7 @@ telaSobre BYTE 10, 10, 10, 9, 9, "Sobre", 10, 10
 		  BYTE 9,9,9, "Luciano de Oliveira Neris", 10, 10
 		  BYTE 9,9,"(0) Voltar", 10, 0
 
-telaAjuda BYTE 10, 10, 9, 9, "Ajuda", 10, 10
+telaAjuda BYTE 10, 10, 9, 9, "Ajuda", 10, 10						; Tela de ajuda ao jogador
 		  BYTE 9, 9, "'!' representa o personagem", 10
 		  BYTE 9, 9, "'.' representa cada bloco do chao", 10
 		  BYTE 9, 9, "'+' representa cada bloco das paredes", 10
@@ -59,7 +59,7 @@ telaAjuda BYTE 10, 10, 9, 9, "Ajuda", 10, 10
 		  BYTE 9, 9, "(0) Voltar", 10, 0
 
 
-telaCongratulacoes BYTE 10, 10
+telaCongratulacoes BYTE 10, 10																						; Tela de congratulações
 					BYTE " _____                             _         _       _   _                 ", 10
 					BYTE "/  __ \                           | |       | |     | | (_)                ", 10
 					BYTE "| /  \/ ___  _ __   __ _ _ __ __ _| |_ _   _| | __ _| |_ _  ___  _ __  ___ ", 10
@@ -72,15 +72,15 @@ telaCongratulacoes BYTE 10, 10
 					BYTE "   (0) Voltar ao menu principal", 10, 0
 
 
-campo BYTE 101 dup (?) 
-campoAtual BYTE 1
-localOcupado BYTE 0
-qtdMovimentos DWORD 0
-qtdCaixas BYTE 0
-qtdCaixasPosicionadas BYTE 0
+campo BYTE 101 dup (?) 													; Variável campo, a ser preenchida com o mapa atual
+campoAtual BYTE 1														; Variável que rastreia qual o mapa atual do jogador
+localOcupado BYTE 0														; Variável que checa se o usuário estava em uma posição onde existia um x anteriormente
+qtdMovimentos DWORD 0													; Contador de quantos movimentos o jogador realizou em um determinado mapa
+qtdCaixas BYTE 0														; Quantidade de caixas existentes em um determinado mapa
+qtdCaixasPosicionadas BYTE 0											; Quantidade de caixas posicionadas no local correto
 
-; posicao = 65d ou 41h
-primeiroCampo BYTE "          "
+; posicao = 65d ou 41h													
+primeiroCampo BYTE "          "											; Variável referente à configuração inicial do primeiro campo
 			  BYTE "          "
 			  BYTE "   +++    "
 			  BYTE "   +x+    "
@@ -92,7 +92,7 @@ primeiroCampo BYTE "          "
 			  BYTE "    +++   ", 0
 
 ; posicao = 21d ou 15h
-segundoCampo  BYTE "          "
+segundoCampo  BYTE "          "											; Variável referente à configuração inicial do segundo campo
 			  BYTE "+++++     "
 			  BYTE "+!..+     "
 			  BYTE "+.oo+ +++ "
@@ -104,7 +104,7 @@ segundoCampo  BYTE "          "
 			  BYTE " +++++    ", 0
 
 ; posicao = 52d ou 34h
-terceiroCampo BYTE "          "
+terceiroCampo BYTE "          "											; Variável referente à configuração inicial do segundo campo
 			  BYTE "          "
 			  BYTE " +++++++  "
 			  BYTE " +.....+++"
@@ -125,7 +125,7 @@ beep PROTO
 
 main PROC
 									; Iniciar Menu
-menuPrincipal:
+menuPrincipal:	
 	mov eax, lightGreen
 	call SetTextColor
 	invoke Clrscr
@@ -304,21 +304,21 @@ resetarJogo:
 	jz Campo2
 	jmp Campo3
 
-campo1:
+campo1:													; ~~~~~~~~ Preenche a variável campo com o campo 1 ~~~~~~~~
 	mov edx, OFFSET primeiroCampo
 	mov posicao, 65d
 	mov qtdCaixas, 4
 	call atualizaCampoAtual
 	jmp LoopEvento
 
-campo2:
+campo2::													; ~~~~~~~~ Preenche a variável campo com o campo 2 ~~~~~~~~
 	mov edx, OFFSET segundoCampo
 	mov posicao, 21d
 	mov qtdCaixas, 3
 	call atualizaCampoAtual
 	jmp LoopEvento
 
-campo3:
+campo3::													; ~~~~~~~~ Preenche a variável campo com o campo 3 ~~~~~~~~
 	mov edx, OFFSET terceiroCampo
 	mov posicao, 52d
 	mov qtdCaixas, 4
@@ -342,13 +342,13 @@ espereEntrada:
 
 	call movimenta					; ~~~~~~~~ chamada do procedimento de movimento ~~~~~~~~~~
 
-	mov al, qtdCaixasPosicionadas
+	mov al, qtdCaixasPosicionadas	; ~~~~~~~~ Compara a quantidade de caixas existentes no mapa com as posicionadas em local correto ~~~~~~~~~~
 	cmp al, qtdCaixas
 	jz proximoCampo
 
 	jmp loopEvento
 
-proximoCampo:
+proximoCampo:						; ~~~~~~~~ Caso todas as caixas tenham sido posicionadas no local correto, vai ao próximo campo ou à tela de congratulações ~~~~~~~~~~
 	inc campoAtual
 	cmp campoAtual, 4
 	jz congratulacoes
@@ -382,9 +382,9 @@ movimenta PROC
 	jz moveBaixo
 	jmp movimentoInvalido
 
-moveEsquerda:
-	mov edx, posicao
-	mov ecx, posicao
+moveEsquerda:; ~~~~~~~~ Tratamento de todos os movimentos para a esquerda ~~~~~~~~~~
+	mov edx, posicao 					; ~~~~~~~~ Define edx como posicao ~~~~~~~~~~
+	mov ecx, posicao 					; ~~~~~~~~ Define ecx como posicao-1 ~~~~~~~~~~
 	dec ecx
 	mov al, campo[ecx]
 	cmp al, 43d					
@@ -396,7 +396,7 @@ moveEsquerda:
 	cmp al, 46d
 	jz moveChaoEsquerda
 
-	mov bl, localOcupado
+	mov bl, localOcupado 					; ~~~~~~~~ Tratamento caso o usuário estivesse em um campo marcado com x e se movendo para outro x  ~~~~~~~~~~
 	cmp bl, 1
 	jz movePosicaoEsquerdaOcupado
 	mov localOcupado, 1
@@ -405,17 +405,17 @@ moveEsquerda:
 	mov posicao, ecx
 	jmp fimMovimento
 
-movePosicaoEsquerdaOcupado:
+movePosicaoEsquerdaOcupado:	
 	mov campo[edx], 120d
 	mov campo[ecx], 33d
 	mov posicao, ecx
 	jmp fimMovimento
 	
 
-moveChaoEsquerda:
+moveChaoEsquerda:					 					; ~~~~~~~~ Tratamento caso o usuário esteja se movendo para um .  ~~~~~~~~~~
 	mov bl, localOcupado
 	cmp bl, 1
-	jz moveChaoEsquerdaOcupado
+	jz moveChaoEsquerdaOcupado		 					; ~~~~~~~~ Checa se o campo em que o usuário estava era um x ~~~~~~~~~~
 	mov campo[edx], 46d
 	mov campo[ecx], 33d
 	mov posicao, ecx
@@ -429,12 +429,12 @@ moveChaoEsquerdaOcupado:
 	jmp fimMovimento
 
 
-movimentaCaixaEsquerda:
+movimentaCaixaEsquerda:					 				; ~~~~~~~~ Tratamento do movimento do usuário caso esteja se movendo para uma caixa  ~~~~~~~~~~
 	mov ebx, posicao
 	dec ebx
 	dec ebx
 	mov ah, campo[ebx]
-	cmp ah, 43d
+	cmp ah, 43d							 				; ~~~~~~~~ Dos casos em que o movimento é inválido ~~~~~~~~~~
 	jz movimentoInvalido
 	cmp ah, 111d
 	jz movimentoInvalido
@@ -443,20 +443,20 @@ movimentaCaixaEsquerda:
 
 
 	cmp ah, 46d						
-	jz movimentaCaixaEsquerdaChao
+	jz movimentaCaixaEsquerdaChao		 				; ~~~~~~~~ Se a caixa for se mover para um chão  ~~~~~~~~~~
 	push ebx
 	mov bl, localOcupado
 	cmp bl, 1
-	jz localOcupadoEsquerda
+	jz localOcupadoEsquerda 	 						; ~~~~~~~~ Se a caixa for se mover para um x  ~~~~~~~~~~
 	mov campo[edx], 46d
-	cmp al, 88d
+	cmp al, 88d											; ~~~~~~~~ Se a caixa a ser movida estivesse no local correto, 'X' ~~~~~~~~~~
 	jz moveEsquerdaFimOcupado
 	mov localOcupado, 0
 	inc qtdCaixasPosicionadas
 	jmp moveEsquerdaFim
 
 
-localOcupadoEsquerda:
+localOcupadoEsquerda:  									; ~~~~~~~~ Trata do fato de o lugar para o qual o jogador vai ser ou não um x ~~~~~~~~~~
 	mov campo[edx], 120d
 	cmp al, 88d
 	jz moveEsquerdaFim 
@@ -501,9 +501,9 @@ moveEsquerdaFimChaoNo:
 	mov campo[ebx], 111d
 	jmp fimMovimento
 
-moveDireita:
-	mov edx, posicao
-	mov ecx, posicao
+moveDireita:; ~~~~~~~~ Tratamento de todos os movimentos para a direita ~~~~~~~~~~
+	mov edx, posicao 					; ~~~~~~~~ Define edx como posicao ~~~~~~~~~~
+	mov ecx, posicao; ~~~~~~~~ Define ecx como posicao+1 ~~~~~~~~~~
 	inc ecx
 	mov al, campo[ecx]
 	cmp al, 43d					
@@ -515,7 +515,7 @@ moveDireita:
 	cmp al, 46d
 	jz moveChaoDireita
 
-	mov bl, localOcupado
+	mov bl, localOcupado 					; ~~~~~~~~ Tratamento caso o usuário estivesse em um campo marcado com x e se movendo para outro x  ~~~~~~~~~~
 	cmp bl, 1
 	jz movePosicaoDireitaOcupado
 	mov localOcupado, 1
@@ -531,10 +531,10 @@ movePosicaoDireitaOcupado:
 	jmp fimMovimento
 	
 
-moveChaoDireita:
+moveChaoDireita:; ~~~~~~~~ Tratamento caso o usuário esteja se movendo para um .  ~~~~~~~~~~
 	mov bl, localOcupado
 	cmp bl, 1
-	jz moveChaoDireitaOcupado
+	jz moveChaoDireitaOcupado		 					; ~~~~~~~~ Checa se o campo em que o usuário estava era um x ~~~~~~~~~~
 	mov campo[edx], 46d
 	mov campo[ecx], 33d
 	mov posicao, ecx
@@ -548,12 +548,12 @@ moveChaoDireitaOcupado:
 	jmp fimMovimento
 
 
-movimentaCaixaDireita:
+movimentaCaixaDireita:; ~~~~~~~~ Tratamento do movimento do usuário caso esteja se movendo para uma caixa  ~~~~~~~~~~
 	mov ebx, posicao
 	inc ebx
 	inc ebx
 	mov ah, campo[ebx]
-	cmp ah, 43d
+	cmp ah, 43d							 				; ~~~~~~~~ Dos casos em que o movimento é inválido ~~~~~~~~~~
 	jz movimentoInvalido
 	cmp ah, 111d
 	jz movimentoInvalido
@@ -562,20 +562,20 @@ movimentaCaixaDireita:
 
 
 	cmp ah, 46d						
-	jz movimentaCaixaDireitaChao
+	jz movimentaCaixaDireitaChao		 				; ~~~~~~~~ Se a caixa for se mover para um chão  ~~~~~~~~~~
 	push ebx
 	mov bl, localOcupado
 	cmp bl, 1
-	jz localOcupadoDireita
+	jz localOcupadoDireita 	 						; ~~~~~~~~ Se a caixa for se mover para um x  ~~~~~~~~~~
 	mov campo[edx], 46d
-	cmp al, 88d
+	cmp al, 88d											; ~~~~~~~~ Se a caixa a ser movida estivesse no local correto, 'X' ~~~~~~~~~~
 	jz moveDireitaFimOcupado
 	mov localOcupado, 0
 	inc qtdCaixasPosicionadas
 	jmp moveDireitaFim
 
 
-localOcupadoDireita:
+localOcupadoDireita:  									; ~~~~~~~~ Trata do fato de o lugar para o qual o jogador vai ser ou não um x ~~~~~~~~~~
 	mov campo[edx], 120d
 	cmp al, 88d
 	jz moveDireitaFim 
@@ -619,9 +619,9 @@ moveDireitaFimChaoNo:
 	pop ebx
 	mov campo[ebx], 111d
 	jmp fimMovimento
-moveBaixo:
-	mov edx, posicao
-	mov ecx, posicao
+moveBaixo:; ~~~~~~~~ Tratamento de todos os movimentos para baixo ~~~~~~~~~~
+	mov edx, posicao 					; ~~~~~~~~ Define edx como posicao ~~~~~~~~~~
+	mov ecx, posicao; ~~~~~~~~ Define ecx como posicao+10 ~~~~~~~~~~
 	push edx
 	mov edx, 10d
 	add ecx, edx
@@ -636,7 +636,7 @@ moveBaixo:
 	cmp al, 46d
 	jz moveChaoBaixo
 
-	mov bl, localOcupado
+	mov bl, localOcupado 					; ~~~~~~~~ Tratamento caso o usuário estivesse em um campo marcado com x e se movendo para outro x  ~~~~~~~~~~
 	cmp bl, 1
 	jz movePosicaoBaixoOcupado
 	mov localOcupado, 1
@@ -652,10 +652,10 @@ movePosicaoBaixoOcupado:
 	jmp fimMovimento
 	
 
-moveChaoBaixo:
+moveChaoBaixo:; ~~~~~~~~ Tratamento caso o usuário esteja se movendo para um .  ~~~~~~~~~~
 	mov bl, localOcupado
 	cmp bl, 1
-	jz moveChaoBaixoOcupado
+	jz moveChaoBaixoOcupado		 					; ~~~~~~~~ Checa se o campo em que o usuário estava era um x ~~~~~~~~~~
 	mov campo[edx], 46d
 	mov campo[ecx], 33d
 	mov posicao, ecx
@@ -669,14 +669,14 @@ moveChaoBaixoOcupado:
 	jmp fimMovimento
 
 
-movimentaCaixaBaixo:
+movimentaCaixaBaixo:; ~~~~~~~~ Tratamento do movimento do usuário caso esteja se movendo para uma caixa  ~~~~~~~~~~
 	mov ebx, posicao
 	push edx
 	mov edx, 20d
 	add ebx, edx
 	pop edx
 	mov ah, campo[ebx]
-	cmp ah, 43d
+	cmp ah, 43d							 				; ~~~~~~~~ Dos casos em que o movimento é inválido ~~~~~~~~~~
 	jz movimentoInvalido
 	cmp ah, 111d
 	jz movimentoInvalido
@@ -685,20 +685,20 @@ movimentaCaixaBaixo:
 
 
 	cmp ah, 46d
-	jz movimentaCaixaBaixoChao
+	jz movimentaCaixaBaixoChao		 				; ~~~~~~~~ Se a caixa for se mover para um chão  ~~~~~~~~~~
 	push ebx
 	mov bl, localOcupado
 	cmp bl, 1
-	jz localOcupadoBaixo
+	jz localOcupadoBaixo 	 						; ~~~~~~~~ Se a caixa for se mover para um x  ~~~~~~~~~~
 	mov campo[edx], 46d
-	cmp al, 88d
+	cmp al, 88d											; ~~~~~~~~ Se a caixa a ser movida estivesse no local correto, 'X' ~~~~~~~~~~
 	jz moveBaixoFimOcupado
 	mov localOcupado, 0
 	inc qtdCaixasPosicionadas
 	jmp moveBaixoFim
 
 
-localOcupadoBaixo:
+localOcupadoBaixo:  									; ~~~~~~~~ Trata do fato de o lugar para o qual o jogador vai ser ou não um x ~~~~~~~~~~
 	mov campo[edx], 120d
 	cmp al, 88d
 	jz moveBaixoFim 
@@ -743,9 +743,9 @@ moveBaixoFimChaoNo:
 	mov campo[ebx], 111d
 	jmp fimMovimento
 
-moveCima:
-	mov edx, posicao
-	mov ecx, posicao
+moveCima:; ~~~~~~~~ Tratamento de todos os movimentos para cima ~~~~~~~~~~
+	mov edx, posicao 					; ~~~~~~~~ Define edx como posicao ~~~~~~~~~~
+	mov ecx, posicao; ~~~~~~~~ Define ecx como posicao-10 ~~~~~~~~~~
 	push edx
 	mov edx, 10d
 	sub ecx, edx
@@ -760,9 +760,9 @@ moveCima:
 	cmp al, 46d
 	jz moveChaoCima
 
-	mov bl, localOcupado
+	mov bl, localOcupado 					; ~~~~~~~~ Tratamento caso o usuário estivesse em um campo marcado com x e se movendo para outro x  ~~~~~~~~~~
 	cmp bl, 1
-	jz movePosicaoCimaOcupado
+	jz movePosicaoCimaOcupado		 					; ~~~~~~~~ Checa se o campo em que o usuário estava era um x ~~~~~~~~~~
 	mov localOcupado, 1
 	mov campo[edx], 46d
 	mov campo[ecx], 33d
@@ -776,7 +776,7 @@ movePosicaoCimaOcupado:
 	jmp fimMovimento
 	
 
-moveChaoCima:
+moveChaoCima:; ~~~~~~~~ Tratamento caso o usuário esteja se movendo para um .  ~~~~~~~~~~
 	mov bl, localOcupado
 	cmp bl, 1
 	jz moveChaoCimaOcupado
@@ -793,14 +793,14 @@ moveChaoCimaOcupado:
 	jmp fimMovimento
 
 
-movimentaCaixaCima:
+movimentaCaixaCima:; ~~~~~~~~ Tratamento do movimento do usuário caso esteja se movendo para uma caixa  ~~~~~~~~~~
 	mov ebx, posicao
 	push edx
 	mov edx, 20d
 	sub ebx, edx
 	pop edx
 	mov ah, campo[ebx]
-	cmp ah, 43d
+	cmp ah, 43d							 				; ~~~~~~~~ Dos casos em que o movimento é inválido ~~~~~~~~~~
 	jz movimentoInvalido
 	cmp ah, 111d
 	jz movimentoInvalido
@@ -809,20 +809,20 @@ movimentaCaixaCima:
 
 
 	cmp ah, 46d
-	jz movimentaCaixaCimaChao
+	jz movimentaCaixaCimaChao		 				; ~~~~~~~~ Se a caixa for se mover para um chão  ~~~~~~~~~~
 	push ebx
 	mov bl, localOcupado
 	cmp bl, 1
-	jz localOcupadoCima
+	jz localOcupadoCima 	 						; ~~~~~~~~ Se a caixa for se mover para um x  ~~~~~~~~~~
 	mov campo[edx], 46d
-	cmp al, 88d
+	cmp al, 88d											; ~~~~~~~~ Se a caixa a ser movida estivesse no local correto, 'X' ~~~~~~~~~~
 	jz moveCimaFimOcupado
 	mov localOcupado, 0
 	inc qtdCaixasPosicionadas
 	jmp moveCimaFim
 
 
-localOcupadoCima:
+localOcupadoCima:  									; ~~~~~~~~ Trata do fato de o lugar para o qual o jogador vai ser ou não um x ~~~~~~~~~~
 	mov campo[edx], 120d
 	cmp al, 88d
 	jz moveCimaFim 
