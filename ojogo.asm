@@ -1,4 +1,4 @@
-include Irvine32.inc
+include ..\Irvine32.inc
 ; [x] Desenvolver o procedimento que imprime a tela do menu inicial.
 ; [x] Desenvolver o procedimento que imprime a tela sobre.
 ; [x] Desenvolver o procedimento que imprime a tela de instruções.
