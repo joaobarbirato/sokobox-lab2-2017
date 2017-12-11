@@ -69,7 +69,7 @@ telaCongratulacoes BYTE 10, 10
 					BYTE "                    __/ |                                                  ", 10
 					BYTE "                   |___/                                                   ", 10, 10
 					BYTE "                                                                           ", 10, 10
-					BYTE "   Aperte qualquer tecla para voltar ao menu principal", 10, 0
+					BYTE "   (0) Voltar ao menu principal", 10, 0
 
 
 campo BYTE 101 dup (?) 
@@ -351,11 +351,11 @@ espereEntrada:
 proximoCampo:
 	inc campoAtual
 	cmp campoAtual, 4
-	jz congratulations
+	jz congratulacoes
 	jmp resetarJogo
 
 
-congratulations:					; ~~~~~~~~~ tela de ganhou ~~~~~~~~~~
+congratulacoes:					; ~~~~~~~~~ tela de ganhou ~~~~~~~~~~
 	invoke Clrscr
 	mov edx, OFFSET telaCongratulacoes
 	invoke WriteString
@@ -363,6 +363,7 @@ congratulations:					; ~~~~~~~~~ tela de ganhou ~~~~~~~~~~
 cz2:
 	invoke ReadKey
 	jz cz2
+	cmp al, 30h
 
 
 saidaJogoLoop:
