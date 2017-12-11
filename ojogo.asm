@@ -24,7 +24,7 @@ include Irvine32.inc
 
 posicao DWORD ?
 
-telaMenu BYTE  10, 10, 10, 9, 9, "SOKOBAN", 10, 10
+telaMenu BYTE  10, 10, 9, 9, "SOKOBAN", 10, 10
 			  BYTE  9, 9, "(1) Novo Jogo", 10
 			  BYTE  9, 9, "(2) Ajuda", 10
 			  BYTE  9, 9, "(3) Sobre", 10
@@ -68,8 +68,8 @@ telaCongratulacoes BYTE 10, 10
 					BYTE " \____/\___/|_| |_|\__, |_|  \__,_|\__|\__,_|_|\__,_|\__|_|\___/|_| |_|___/", 10
 					BYTE "                    __/ |                                                  ", 10
 					BYTE "                   |___/                                                   ", 10, 10
-					BYTE "      Voce conseguiu vencer o jogo, agora pode esquecer da tristeza que foi fazer isso :)", 10, 10
-					BYTE "   Aperte qualquer botao para voltar ao menu principal", 10, 0
+					BYTE "                                                                           ", 10, 10
+					BYTE "   Aperte qualquer tecla para voltar ao menu principal", 10, 0
 
 
 campo BYTE 101 dup (?) 
@@ -441,7 +441,7 @@ movimentaCaixaEsquerda:
 	jz movimentoInvalido
 
 
-	cmp ah, 46d						; Caixa será movida para um chão?
+	cmp ah, 46d						
 	jz movimentaCaixaEsquerdaChao
 	push ebx
 	mov bl, localOcupado
@@ -560,7 +560,7 @@ movimentaCaixaDireita:
 	jz movimentoInvalido
 
 
-	cmp ah, 46d						; Caixa será movida para um chão?
+	cmp ah, 46d						
 	jz movimentaCaixaDireitaChao
 	push ebx
 	mov bl, localOcupado
