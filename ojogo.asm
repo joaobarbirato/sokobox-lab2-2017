@@ -25,7 +25,7 @@ include ..\Irvine32.inc
 posicao DWORD ?														; Posição do jogador no mapa. posicao/10 = row, posicao%10 = column
 
 telaMenu BYTE  10, 10, 9, 9, "SOKOBAN", 10, 10						; Menu Inicial
-			  BYTE  9, 9, "(1) Novo Jogo", 10						
+			  BYTE  9, 9, "(1) Jogar", 10						
 			  BYTE  9, 9, "(2) Ajuda", 10
 			  BYTE  9, 9, "(3) Sobre", 10
 			  BYTE 	9, 9, "(0) Sair", 10, 10, 0
@@ -452,6 +452,7 @@ movimentaCaixaEsquerda:					 				; ~~~~~~~~ Tratamento do movimento do usuário 
 	cmp al, 88d											; ~~~~~~~~ Se a caixa a ser movida estivesse no local correto, 'X' ~~~~~~~~~~
 	jz moveEsquerdaFimOcupado
 	mov localOcupado, 0
+	call beep
 	inc qtdCaixasPosicionadas
 	jmp moveEsquerdaFim
 
@@ -461,6 +462,7 @@ localOcupadoEsquerda:  									; ~~~~~~~~ Trata do fato de o lugar para o qual 
 	cmp al, 88d
 	jz moveEsquerdaFim 
 	mov localOcupado, 0
+	call beep
 	inc qtdCaixasPosicionadas
 	jmp moveEsquerdaFim
 
@@ -571,6 +573,7 @@ movimentaCaixaDireita:; ~~~~~~~~ Tratamento do movimento do usuário caso esteja
 	cmp al, 88d											; ~~~~~~~~ Se a caixa a ser movida estivesse no local correto, 'X' ~~~~~~~~~~
 	jz moveDireitaFimOcupado
 	mov localOcupado, 0
+	call beep
 	inc qtdCaixasPosicionadas
 	jmp moveDireitaFim
 
@@ -580,6 +583,7 @@ localOcupadoDireita:  									; ~~~~~~~~ Trata do fato de o lugar para o qual o
 	cmp al, 88d
 	jz moveDireitaFim 
 	mov localOcupado, 0
+	call beep
 	inc qtdCaixasPosicionadas
 	jmp moveDireitaFim
 
@@ -694,6 +698,7 @@ movimentaCaixaBaixo:; ~~~~~~~~ Tratamento do movimento do usuário caso esteja s
 	cmp al, 88d											; ~~~~~~~~ Se a caixa a ser movida estivesse no local correto, 'X' ~~~~~~~~~~
 	jz moveBaixoFimOcupado
 	mov localOcupado, 0
+	call beep
 	inc qtdCaixasPosicionadas
 	jmp moveBaixoFim
 
@@ -703,6 +708,7 @@ localOcupadoBaixo:  									; ~~~~~~~~ Trata do fato de o lugar para o qual o j
 	cmp al, 88d
 	jz moveBaixoFim 
 	mov localOcupado, 0
+	call beep
 	inc qtdCaixasPosicionadas
 	jmp moveBaixoFim
 
@@ -818,6 +824,7 @@ movimentaCaixaCima:; ~~~~~~~~ Tratamento do movimento do usuário caso esteja se
 	cmp al, 88d											; ~~~~~~~~ Se a caixa a ser movida estivesse no local correto, 'X' ~~~~~~~~~~
 	jz moveCimaFimOcupado
 	mov localOcupado, 0
+	call beep
 	inc qtdCaixasPosicionadas
 	jmp moveCimaFim
 
@@ -827,6 +834,7 @@ localOcupadoCima:  									; ~~~~~~~~ Trata do fato de o lugar para o qual o jo
 	cmp al, 88d
 	jz moveCimaFim 
 	mov localOcupado, 0
+	call beep
 	inc qtdCaixasPosicionadas
 	jmp moveCimaFim
 
@@ -868,7 +876,6 @@ moveCimaFimChaoNo:
 	jmp fimMovimento
 
 fimMovimento:
-	call beep
 	inc qtdMovimentos
 
 movimentoInvalido:
