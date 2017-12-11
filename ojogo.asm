@@ -1,4 +1,4 @@
-include ..\Irvine32.inc
+include Irvine32.inc
 ; [x] Desenvolver o procedimento que imprime a tela do menu inicial.
 ; [x] Desenvolver o procedimento que imprime a tela sobre.
 ; [x] Desenvolver o procedimento que imprime a tela de instruções.
@@ -24,11 +24,11 @@ include ..\Irvine32.inc
 
 posicao DWORD ?
 
-telaMenu BYTE "SOKOBAN", 10, 10
-			  BYTE "(1) Novo Jogo", 10
-			  BYTE "(2) Ajuda", 10
-			  BYTE "(3) Sobre", 10
-			  BYTE "(0) Sair", 10, 10, 0
+telaMenu BYTE  10, 10, 10, 9, 9, "SOKOBAN", 10, 10
+			  BYTE  9, 9, "(1) Novo Jogo", 10
+			  BYTE  9, 9, "(2) Ajuda", 10
+			  BYTE  9, 9, "(3) Sobre", 10
+			  BYTE 	9, 9, "(0) Sair", 10, 10, 0
 
 
 imprimeQtdMovimentos BYTE "Quantidade de movimentos: ", 0
@@ -36,34 +36,31 @@ imprimeQtdMovimentos BYTE "Quantidade de movimentos: ", 0
 imprimeComandosEmJogo 	BYTE "Aperte 0 para voltar ao menu inicial", 10
 						BYTE "Aperte 1 para retornar a configuracao inicial do campo", 10, 0
 
-telaSobre BYTE "Sobre", 10, 10
-		  BYTE "Desenvolvido por:", 10
-		  BYTE 9, "Joao Gabriel Melo Barbirato", 10
-		  BYTE 9, "Nicholas Resende Franco de Oliveira Lopes", 10
-		  BYTE 9, "Renata Sarmet Smiderle Mendes", 10, 10
-		  BYTE "Disciplina:", 10
-		  BYTE 9, "Laboratorio de Arquitetura e Organizacao de Computadores 2", 10, 10
-		  BYTE "Disciplina:", 10
-		  BYTE 9, "Luciano de Oliveira Neris", 10, 10
-		  BYTE "(0) Voltar", 10, 0
+telaSobre BYTE 10, 10, 10, 9, 9, "Sobre", 10, 10
+		  BYTE 9,9,"Desenvolvido por:", 10
+		  BYTE 9,9,9, "Joao Gabriel Melo Barbirato", 10
+		  BYTE 9,9,9, "Nicholas Resende Franco de Oliveira Lopes", 10
+		  BYTE 9,9,9, "Renata Sarmet Smiderle Mendes", 10, 10
+		  BYTE 9,9,"Disciplina:", 10
+		  BYTE 9,9,9, "Laboratorio de Arquitetura e Organizacao de Computadores 2", 10, 10
+		  BYTE 9,9,"Disciplina:", 10
+		  BYTE 9,9,9, "Luciano de Oliveira Neris", 10, 10
+		  BYTE 9,9,"(0) Voltar", 10, 0
 
-telaAjuda BYTE "Ajuda", 10, 10
-		  BYTE "'!' representa o personagem", 10
-		  BYTE "'.' representa cada bloco do chao", 10
-		  BYTE "'+' representa cada bloco das paredes", 10
-		  BYTE "' ' representa o vazio", 10
-		  BYTE "'o' representa as caixas", 10
-		  BYTE "'X' representa os lugares para posicionar as caixas", 10
-		  BYTE "'O' representa as caixas ja posicionadas nos locais demarcaados", 10, 10
-		  BYTE "O objetivo e posicionar todas as caixas nos locais demarcados!", 10, 10, 10
-		  BYTE "(0) Voltar", 10, 0
-
-telaCongratulacoes BYTE "Parabens", 10, 10
-		  BYTE "Voce ganhou!", 10, 10
-		  BYTE "Press any button", 10, 0
+telaAjuda BYTE 10, 10, 9, 9, "Ajuda", 10, 10
+		  BYTE 9, 9, "'!' representa o personagem", 10
+		  BYTE 9, 9, "'.' representa cada bloco do chao", 10
+		  BYTE 9, 9, "'+' representa cada bloco das paredes", 10
+		  BYTE 9, 9, "' ' representa o vazio", 10
+		  BYTE 9, 9, "'o' representa as caixas", 10
+		  BYTE 9, 9, "'X' representa os lugares para posicionar as caixas", 10
+		  BYTE 9, 9, "'O' representa as caixas ja posicionadas nos locais demarcaados", 10, 10
+		  BYTE 9, 9, "O objetivo e posicionar todas as caixas nos locais demarcados!", 10, 10, 10
+		  BYTE 9, 9, "(0) Voltar", 10, 0
 
 
-telaCongratulacoes2 BYTE " _____                             _         _       _   _                 ", 10
+telaCongratulacoes BYTE 10, 10
+					BYTE " _____                             _         _       _   _                 ", 10
 					BYTE "/  __ \                           | |       | |     | | (_)                ", 10
 					BYTE "| /  \/ ___  _ __   __ _ _ __ __ _| |_ _   _| | __ _| |_ _  ___  _ __  ___ ", 10
 					BYTE "| |    / _ \| '_ \ / _` | '__/ _` | __| | | | |/ _` | __| |/ _ \| '_ \/ __|", 10
@@ -81,8 +78,6 @@ localOcupado BYTE 0
 qtdMovimentos DWORD 0
 qtdCaixas BYTE 0
 qtdCaixasPosicionadas BYTE 0
-
-; TODO: resolver esse char 10d (fazer lógica de pular linha)
 
 ; posicao = 65d ou 41h
 primeiroCampo BYTE "          "
@@ -129,8 +124,10 @@ atualizaCampoAtual PROTO
 beep PROTO
 
 main PROC
-	; Iniciar Menu
+									; Iniciar Menu
 menuPrincipal:
+	mov eax, lightGreen
+	call SetTextColor
 	invoke Clrscr
 	mov edx, OFFSET telaMenu
 	invoke WriteString
@@ -140,7 +137,7 @@ espereImputMenuPrincipal:
 	invoke Delay
 	invoke ReadKey
 	jz espereImputMenuPrincipal
-									; TODO: desaparecer o numero entrado pelo usuario
+
 	cmp al, 31h						; ir para (1) NovoJogo
 	je novoJogo
 	cmp al, 32h						; ir para (2) Ajuda
@@ -151,7 +148,9 @@ espereImputMenuPrincipal:
 	je Sair
 	jmp menuPrincipal
 
-Sobre:
+Sobre:								; ~~~~~~~~ Tela sobre ~~~~~~~~~
+	mov eax, yellow
+	call SetTextColor
 	invoke Clrscr					; Limpe a tela
 	mov edx, OFFSET telaSobre 		; Escrever o texto da tela sobre
 	invoke WriteString
@@ -165,6 +164,8 @@ espereImputSobre:
 	jmp Sobre
 
 Ajuda:
+	mov eax, lightCyan				; ~~~~~~~~ Tela Ajuda ~~~~~~~~
+	call SetTextColor
 	invoke Clrscr					; Limpe a tela
 	mov edx, OFFSET telaAjuda 		; Escrever o texto da tela sobre
 	invoke WriteString
@@ -177,7 +178,7 @@ espereImputAjuda:
 	je menuPrincipal
 	jmp Ajuda
 
-novoJogo:
+novoJogo:							;  ~~~~~~~~ Novo Jogo ~~~~~~~~
 	call jogoLoop
 	jmp menuPrincipal
 
@@ -194,8 +195,8 @@ Sair:
 	exit
 main ENDP
 
-; atualiza a variavel campo
-atualizaCampoAtual PROC uses edx
+;  ~~~~~~~~ atualiza a variavel campo ~~~~~~~~
+atualizaCampoAtual PROC
 	mov ecx, 0						; loop
 AtualizaL1:
 	mov al, [edx+ecx]
@@ -207,9 +208,9 @@ AtualizaL1:
 	ret
 atualizaCampoAtual ENDP
 
-; imprime um campo
-imprimeTelaJogo PROC 				; uses campo
-	mov ecx, 0						;
+; ~~~~~~~~ imprime um campo ~~~~~~~~
+imprimeTelaJogo PROC 				
+	mov ecx, 0						
 ImprimeL1:
 	call Crlf
 	mov esi, 0
@@ -217,7 +218,7 @@ ImprimeL2:
 	mov eax, lightGray+(white*16)
 	call SetTextColor
 
-	mov al, campo[ecx]				; move campo pra writechar
+	mov al, campo[ecx]				; move campo para writechar
 	; pintar
 	cmp al, '!'						; pinta personagem
 	jz pintaPersonagem
@@ -275,7 +276,6 @@ parePintar:
 
 ImprimeSair:
 	call Crlf
-	call Crlf
 
 	mov eax, white
 	call SetTextColor
@@ -292,7 +292,7 @@ ImprimeSair:
 	ret
 imprimeTelaJogo ENDP
 
-
+; ~~~~~~~~ Loop principal do jogo ~~~~~~~~
 jogoLoop PROC
 resetarJogo:
 	mov qtdMovimentos, 0
@@ -340,7 +340,7 @@ espereEntrada:
 	cmp al, 31h
 	jz resetarJogo
 
-	call movimenta
+	call movimenta					; ~~~~~~~~ chamada do procedimento de movimento ~~~~~~~~~~
 
 	mov al, qtdCaixasPosicionadas
 	cmp al, qtdCaixas
@@ -355,9 +355,9 @@ proximoCampo:
 	jmp resetarJogo
 
 
-congratulations:
+congratulations:					; ~~~~~~~~~ tela de ganhou ~~~~~~~~~~
 	invoke Clrscr
-	mov edx, OFFSET telaCongratulacoes2
+	mov edx, OFFSET telaCongratulacoes
 	invoke WriteString
 
 cz2:
@@ -369,13 +369,7 @@ saidaJogoLoop:
 	ret
 jogoLoop ENDP
 
-
-									; + (parede) 43d
-									; . (chao) 46d
-									; o (caixa) 111d
-									; x (posicao certa sem caixa) 120d
-									; X (caixa na posicao certa) 88d
-
+; ~~~~~~~~ Movimentar personagem ~~~~~~~~
 movimenta PROC
 	cmp dx, VK_LEFT					; esquerda
 	jz moveEsquerda
@@ -872,19 +866,15 @@ moveCimaFimChaoNo:
 	mov campo[ebx], 111d
 	jmp fimMovimento
 
-
-
-
 fimMovimento:
 	call beep
 	inc qtdMovimentos
-	;invoke Clrscr
-	;call imprimeTelaJogo
 
 movimentoInvalido:
 	ret
 movimenta ENDP
 
+; ~~~~~~~~ Procedimento de som simples ~~~~~~~~
 beep PROC
 	push eax
 	mov al, 7
